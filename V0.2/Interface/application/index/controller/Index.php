@@ -24,4 +24,52 @@ class Index extends Controller
  
     }
 
+    public function validwechat()
+    {
+        define("TOKEN","weixin");
+        if (isset($_GET['echostr'])) {
+            valid();
+        }else{
+            $postData = $GLOBALS[HTTP_RAW_POST_DATA];
+            if(!$postData)
+            {
+                echo  "error";
+                exit();
+            }
+
+            $object = simplexml_load_string($postData,"SimpleXMLElement",LIBXML_NOCDATA);
+            $MsgType = $object->MsgType;
+            switch ($MsgType) { 
+            case 'text':
+                $content = $object ->Content;
+                if (strstr($content, "valid"))
+                {
+                    $validcode = substr($content,6);
+                    $valid = db('steemitaccount')->where('validcode', $validcode)->find();
+                    if(!empty($valid))
+                    {
+                        $steemitname = $valid['steemitname'];
+                        $reply = "Successfully bind your wechat to steemitname{{$steemitname}}";
+                    }
+                    else
+                    {
+                        $reply = "Please input the right valid code.";
+                    }
+                }
+                else
+                {
+                     $reply = "Still in developing";
+                }
+
+
+                return replyText($obj,$reply);
+
+                break;
+            default: 
+                break;
+            }
+        }
+
+    }
+
 }
