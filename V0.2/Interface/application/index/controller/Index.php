@@ -42,6 +42,7 @@ class Index extends Controller
             switch ($MsgType) { 
             case 'text':
                 $content = $object ->Content;
+                $openid = $object ->FromUserName;
                 if (strstr($content, "valid"))
                 {
                     $validcode = substr($content,6);
@@ -49,6 +50,7 @@ class Index extends Controller
                     if(!empty($valid))
                     {
                         $steemitname = $valid['steemitname'];
+                        db('steemitname')->where('validcode',$valid)->update(['openid' => $openid]);
                         $reply = "Successfully bind your wechat to steemitname{{$steemitname}}";
                     }
                     else
