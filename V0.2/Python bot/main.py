@@ -34,12 +34,11 @@ def worker(start, end):
         for trans in transactions:
             operations = trans['operations']
             for op in operations:
-               if op[0] == 'comment' and op[1]['parent_author'] == 'cha0s0000':
-                    postdata = json.dumps(op[1])
-                    send_to_workerman=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-                    send_to_workerman.connect(('192.168.2.1',8282)) 
-                    send_to_workerman.send(postdata.encode('utf-8'))
-                    send_to_workerman.close()
+                postdata = json.dumps(op)
+                send_to_workerman=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                send_to_workerman.connect(('192.168.2.1',8282)) 
+                send_to_workerman.send(postdata.encode('utf-8'))
+                send_to_workerman.close()
                     
 def run():
     global start_block_num
