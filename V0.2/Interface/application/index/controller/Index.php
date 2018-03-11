@@ -58,6 +58,31 @@ class Index extends Controller
                         $reply = "Please input the right valid code.";
                     }
                 }
+
+                else if (strstr($content,"bind"))
+                {
+                    $account = substr($content,5);
+                    $checkaccount = db('steemitaccount')->where('openid', $openid)->find();
+                    if(!empty($checkaccount))
+                    {
+                        $reply = "Your wechat account has binded with steemitname {{$checkaccount['steemitname']}}\n Please input command 'change:YOUR NAME' to rebind a new steemit account";
+                    }
+                    else
+                    {
+                        $data = ['steemitname' => $SteemitName, 'openid' => $openid];
+                        db('steemitaccount')->insert($data);
+                        $reply = "Successfully bind your wechat to steemitname{{$account}}";
+
+                    }
+
+                }
+                else if (strstr($content,"change"))
+                {
+                    $account = substr($content,7);
+                    $data = ['steemitname' => $SteemitName, 'openid' => $openid];
+                    db('steemitaccount')->insert($data);
+                    $reply = "Successfully rebind your wechat to steemitname{{$account}}";
+                }
                 else
                 {
                      $reply = "Still in developing";
