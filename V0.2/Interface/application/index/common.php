@@ -31,28 +31,28 @@ function valid(){
 		}
 	}
 
-	//检查签名
+	//check signature
 function checkSignature()
 	{
-		//获取微信服务器GET请求的4个参数
+		//GET the four parameters from WeChat server
 		$signature = $_GET['signature'];
 		$timestamp = $_GET['timestamp'];
 		$nonce = $_GET['nonce'];
 
-		//定义一个数组，存储其中3个参数，分别是timestamp，nonce和token
+		//create a array to save the parameters
 		$tempArr = array($nonce,$timestamp,TOKEN);
 
-		//进行排序
+		//sorting
 		sort($tempArr,SORT_STRING);
 
-		//将数组转换成字符串
+		//change into string
 
 		$tmpStr = implode($tempArr);
 
-		//进行sha1加密算法
+		//encryption with sha1
 		$tmpStr = sha1($tmpStr);
 
-		//判断请求是否来自微信服务器，对比$tmpStr和$signature
+		//Determine whether the request comes from the WeChat server, versus $tmpStr and $signature.
 		if($tmpStr == $signature)
 		{
 			return true;
@@ -71,7 +71,7 @@ function replyText($obj,$content){
 					<MsgType><![CDATA[text]]></MsgType>
 					<Content><![CDATA[%s]]></Content>
 					</xml>";
-	        //返回一个进行xml数据包
+	        //return a xml format data
 
 		$resultStr = sprintf($replyXml,$obj->FromUserName,$obj->ToUserName,time(),$content);
 	        return $resultStr;		
