@@ -50,7 +50,14 @@ class Events
             $link = 'https://steemit.com/@'.$parent_author.'/'.$link;
             $user = $check;      
             GateWay::sendToAll($message);
-            comment_mention($user,$link,$author,$body);            
+            $res = comment_mention($user,$link,$author,$body); 
+
+            $res_decode = json_decode($res);
+            if($res_decode['errcode'] != 0)
+            {
+              $content = "You have a new comment.\n\nauthor:{$author}\n\nbody:{$body}\n\nlink:{$link}";
+              $res_service = service_mention_text($user,$content);
+            }       
           }
                     
         }
@@ -66,8 +73,13 @@ class Events
             $link = 'https://steemit.com/@'.$author.'/'.$link;
             $user = $check;  
             GateWay::sendToAll($message);
-            vote_mention($user,$link,$voter,$author,$weight);
-           
+            $res = vote_mention($user,$link,$voter,$author,$weight);
+
+            if($res_decode['errcode'] != 0)
+            {
+              $content = "You have a new vote.\n\nvoter:{$voter}\n\nweight:{$weight}\n\nlink:{$link}";
+              $res_service = service_mention_text($user,$content);
+            }  
           }
         }
 
@@ -83,7 +95,12 @@ class Events
             $link = 'https://steemit.com/@'.$author.'/'.$link;
             $user = $check;  
             GateWay::sendToAll($message); 
-            post_mention($user,$link,$max_accepted_payout,$author,$allow_votes);
+            $res = post_mention($user,$link,$max_accepted_payout,$author,$allow_votes);
+            if($res_decode['errcode'] != 0)
+            {
+              $content = "You have a new post.\n\nmax_accepted_payout:{$max_accepted_payout}\n\nallow_votes:{$allow_votes}\n\nlink:{$link}";
+              $res_service = service_mention_text($user,$content);
+            }  
           }
         }
 
@@ -99,7 +116,13 @@ class Events
             $user = $check;  
             
             GateWay::sendToAll($message); 
-            delegator_mention($user,$link,$delegator,$delegatee,$vesting_shares);
+            $res = delegator_mention($user,$link,$delegator,$delegatee,$vesting_shares);
+
+            if($res_decode['errcode'] != 0)
+            {
+              $content = "You have a new delegate.\n\ndelegatee:{$delegatee}\n\nvesting_shares:{$vesting_shares}\n\nlink:{$link}";
+              $res_service = service_mention_text($user,$content);
+            }  
           }
         }
 
@@ -117,8 +140,14 @@ class Events
             $user = $check;
             
             GateWay::sendToAll($message); 
-            follow_mention($user,$link,$follower,$following);
+            $res = follow_mention($user,$link,$follower,$following);
+            if($res_decode['errcode'] != 0)
+            {
+              $content = "You have a new follow.\n\nfollower:{$follower}\n\nfollowing:{$following}\n\nlink:{$link}";
+              $res_service = service_mention_text($user,$content);
+            }  
           }
+          
         }
 
          else if($data_type == 'transfer')
@@ -134,10 +163,15 @@ class Events
             $user = $check;
     
             GateWay::sendToAll($message); 
-            transfer_mention($user,$link,$from,$to,$amount,$memo);
+            $res = transfer_mention($user,$link,$from,$to,$amount,$memo);
+            if($res_decode['errcode'] != 0)
+            {
+              $content = "You have a new transfer.\n\nto:{$to}\n\namount:{$amount}\n\nmemo:{$memo}\n\nlink:{$link}";
+              $res_service = service_mention_text($user,$content);
+            }  
           }
         }
-        
+
        
    }
    
@@ -211,6 +245,7 @@ function comment_mention($user,$link,$author,$body){
     //echo $this->access_token;
     $url="https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$access_token;
     $res=http_request($url,urldecode($json_template));
+    return $res;
 }
 
 function vote_mention($user,$link,$voter,$author,$weight){
@@ -232,6 +267,7 @@ function vote_mention($user,$link,$voter,$author,$weight){
     //echo $this->access_token;
     $url="https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$access_token;
     $res=http_request($url,urldecode($json_template));
+    return $res;
 }
 
 function post_mention($user,$link,$max_accepted_payout,$author,$allow_votes){
@@ -253,6 +289,7 @@ function post_mention($user,$link,$max_accepted_payout,$author,$allow_votes){
     //echo $this->access_token;
     $url="https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$access_token;
     $res=http_request($url,urldecode($json_template));
+    return $res;
 }
 
 function  delegator_mention($user,$link,$delegator,$delegatee,$vesting_shares){
@@ -273,6 +310,7 @@ function  delegator_mention($user,$link,$delegator,$delegatee,$vesting_shares){
     //echo $this->access_token;
     $url="https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$access_token;
     $res=http_request($url,urldecode($json_template));
+    return $res;
 }
 
 function  follow_mention($user,$link,$follower,$following){
@@ -292,6 +330,7 @@ function  follow_mention($user,$link,$follower,$following){
     //echo $this->access_token;
     $url="https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$access_token;
     $res=http_request($url,urldecode($json_template));
+    return $res;
 }
 
 function transfer_mention($user,$link,$from,$to,$amount,$memo){
@@ -313,4 +352,41 @@ function transfer_mention($user,$link,$from,$to,$amount,$memo){
     //echo $this->access_token;
     $url="https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$access_token;
     $res=http_request($url,urldecode($json_template));
+    return $res;
+}
+
+function service_mention_text($user,$content){
+    $access_token = get_access_token();
+    $data = '{
+          "touser":"'.$user.'",
+          "msgtype":"text",
+          "text":
+          {
+               "content":"'.$content.'"
+          }
+      }';
+     $url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=".$access_token;
+     $res=http_request($url,$data);
+     return $res;
+
+}
+function service_mention_news($user,$title,$description,$picurl){
+    $access_token = get_access_token();
+    $data = '{
+          "touser":"'.$user.'",
+          "msgtype":"news",
+          "news":
+          {
+               "articles":[
+                    "title":"'.$title.'",
+                    "description":"'.$description.'",
+                    "url":"'.$url.'",
+                    "picurl":"'.$picurl.'"
+                  ]
+          }
+      }';
+     $url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=".$access_token;
+     $res=http_request($url,$data);
+     return $res;
+
 }
